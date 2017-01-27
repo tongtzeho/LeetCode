@@ -31,6 +31,7 @@ public:
                 }
                 result.push_back(str);
             }
+            return;
         }
         for (i = 0; i < n; i++)
         {
