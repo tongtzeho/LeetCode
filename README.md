@@ -1,5 +1,3 @@
-LeetCode题解
+LeetCode个人题解（C/C++）
 
 文件名对应题号
-
-语言：C、C++、python
