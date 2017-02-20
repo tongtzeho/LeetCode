@@ -19,14 +19,15 @@ bool reverse(struct ListNode *head, int *size)
         (*size)++;
     }
     (*size)--;
-    return (*size) > 0 && prev == head;
+    bool temp = (prev == head);
+    head = prev;
+    return (*size) > 0 && temp;
 }
  
 struct ListNode *detectCycle(struct ListNode *head) {
     if (!head) return NULL;
     int size = 0;
-    bool isCycle = reverse(head, &size);
-    if (isCycle)
+    if (reverse(head, &size))
     {
         reverse(head, &size);
         int i;
