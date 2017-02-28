@@ -1,9 +1,4 @@
-int *sum1, *sum2, result;
-
-int comp(const void *a, const void *b )
-{
-    return *(int*)a-*(int*)b; 
-}
+int *leftsum, *rightsum, *temp, result, sum;
 
 void f(const int *arr, const int l, const int r, const int lower, const int upper) {
     if (r-l == 1)
@@ -14,57 +9,63 @@ void f(const int *arr, const int l, const int r, const int lower, const int uppe
         }
         return;
     }
-    else if (r-l == 2)
-    {
-        if (arr[l] >= lower && arr[l] <= upper)
-        {
-            result++;
-        }
-        if (arr[r-1] >= lower && arr[r-1] <= upper)
-        {
-            result++;
-        }
-        if (arr[l]+arr[r-1] >= lower && arr[l]+arr[r-1] <= upper)
-        {
-            result++;
-        }
-        return;
-    }
     int mid = (l+r)>>1;
     f(arr, l, mid, lower, upper);
     f(arr, mid, r, lower, upper);
-    int i, j;
-    sum1[0] = arr[mid-1];
-    for (i = 1; i < mid-l; i++)
-    {
-        sum1[i] = arr[mid-i-1]+sum1[i-1];
-    }
-    sum2[0] = arr[mid];
-    for (i = 1; i < r-mid; i++)
-    {
-        sum2[i] = arr[mid+i]+sum2[i-1];
-    }
-    qsort(sum1, mid-l, sizeof(sum1[0]), comp);
-    qsort(sum2, r-mid, sizeof(sum2[0]), comp);
-    int maxindex = r-mid-1;
+    int i, j, k;
+    int maxindex = r-1;
     int minindex = maxindex;
-    for (i = 0; i < mid-l; i++)
+    for (i = l; i < mid; i++)
     {
-        while (maxindex >= 0 && sum1[i]+sum2[maxindex] > upper)
+        while (maxindex >= mid && rightsum[i]+leftsum[maxindex]-sum > upper)
         {
             maxindex--;
         }
-        if (maxindex < 0) break;
-        if (sum1[i]+sum2[maxindex] < lower) continue;
+        if (maxindex < mid) break;
+        if (rightsum[i]+leftsum[maxindex]-sum < lower) continue;
         if (maxindex < minindex)
         {
             minindex = maxindex;
         }
-        while (minindex >= 0 && sum1[i]+sum2[minindex] >= lower)
+        while (minindex >= mid && rightsum[i]+leftsum[minindex]-sum >= lower)
         {
             minindex--;
         }
         result += maxindex-minindex;
+    }
+    k = i = l;
+    j = mid;
+    while (k < r)
+    {
+        if (j == r || (i < mid && leftsum[i] < leftsum[j]))
+        {
+            temp[k++] = leftsum[i++];
+        }
+        else
+        {
+            temp[k++] = leftsum[j++];
+        }
+    }
+    for (k = l; k < r; k++)
+    {
+        leftsum[k] = temp[k];
+    }
+    k = i = l;
+    j = mid;
+    while (k < r)
+    {
+        if (j == r || (i < mid && rightsum[i] < rightsum[j]))
+        {
+            temp[k++] = rightsum[i++];
+        }
+        else
+        {
+            temp[k++] = rightsum[j++];
+        }
+    }
+    for (k = l; k < r; k++)
+    {
+        rightsum[k] = temp[k];
     }
 }
 
@@ -72,8 +73,22 @@ int countRangeSum(int* nums, int numsSize, int lower, int upper) {
     int size = numsSize;
     result = 0;
     if (!size) return 0;
-    sum1 = (int*)malloc(sizeof(int)*size);
-    sum2 = (int*)malloc(sizeof(int)*size);
+    leftsum = (int*)malloc(sizeof(int)*size);
+    rightsum = (int*)malloc(sizeof(int)*size);
+    temp = (int*)malloc(sizeof(int)*size);
+    sum = 0;
+    leftsum[0] = nums[0];
+    int i;
+    for (i = 1; i < numsSize; i++)
+    {
+        leftsum[i] = leftsum[i-1]+nums[i];
+    }
+    sum = leftsum[numsSize-1];
+    rightsum[numsSize-1] = nums[numsSize-1];
+    for (i = numsSize-2; i >= 0; i--)
+    {
+        rightsum[i] = rightsum[i+1]+nums[i];
+    }
     f(nums, 0, size, lower, upper);
     return result;    
 }
